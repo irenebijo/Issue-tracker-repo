@@ -1,0 +1,36 @@
+https://helpx.adobe.com/au/experience-manager/kb/Unclosed-ResourceResolver-warnng-at-com-day-cq-search-impl-builder-QueryBuilderImpl.html
+
+INFO* [Apache Sling Resource Resolver Finalizer Thread] org.apache.sling.resourceresolver.impl.CommonResourceResolverFactoryImpl Unclosed ResourceResolver was created here:
+
+Resolution
+On live AEM sites, it is recommended that /bin/querybuilder URLs be blocked by the dispatcher.  These URLs can be used safely on (internal network facing) author instances, but on live sites, it has the potential to open the system to data disclosure.
+
+The workaround for this bug is to avoid using the /bin/querybuilder servlet and instead use the QueryBuilder API. After calling the API, then manually close the ResourceResolver after processing the query result.
+
+Sample code here.
+
+For example, here is code leaking resource resolvers:
+
+Query query = queryBuilder.createQuery(..., session);
+SearchResult result = query.getResult();
+for (Hit hit : result.getHits()) {
+// do some processing
+}
+Workaround code:
+
+// workaround: close internal resource resolver
+Iterator<Resource> resources = result.getResources();
+if (resources.hasNext()) {
+resources.next().getResourceResolver().close();
+}
+Avatar
+Irene Appraem
+Manage account
+Enterprise PDF Services Developer
+Your plan includes 3 apps and services
+Enterprise PDF Services Developer
+Acrobat Send for Review 
+PDF services
+Access your apps
+View all your plans
+Legal Notices    |    Online Privacy Polic
